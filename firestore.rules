@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions (kept for future use)
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "tamtrieufb@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    function isValidRawMaterial(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.unit is string && data.unit.size() > 0 &&
+             data.totalQuantity is number;
+    }
+
+    function isValidBatch(data) {
+      return data.batchNumber is string && data.batchNumber.size() > 0 &&
+             data.quantity is number && data.quantity >= 0 &&
+             data.initialQuantity is number && data.initialQuantity >= 0 &&
+             data.receivedDate is string || data.productionDate is string;
+    }
+
+    // Relaxing all rules for Localhold Demo (Custom Login bypassing Firebase Auth)
+    match /raw_materials/{id} {
+      allow read, write: if true;
+    }
+
+    match /raw_material_batches/{id} {
+      allow read, write: if true;
+    }
+
+    match /finished_products/{id} {
+      allow read, write: if true;
+    }
+
+    match /finished_product_batches/{id} {
+      allow read, write: if true;
+    }
+
+    match /recipes/{id} {
+      allow read, write: if true;
+    }
+
+    match /transactions/{id} {
+      allow read, write: if true;
+    }
+    
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}

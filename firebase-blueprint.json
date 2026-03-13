@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "RawMaterial": {
+      "title": "Raw Material",
+      "description": "Information about raw materials used in production",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "unit": { "type": "string" },
+        "totalQuantity": { "type": "number" }
+      },
+      "required": ["name", "unit"]
+    },
+    "RawMaterialBatch": {
+      "title": "Raw Material Batch",
+      "description": "Specific batch of raw material for FIFO tracking",
+      "type": "object",
+      "properties": {
+        "materialId": { "type": "string" },
+        "batchNumber": { "type": "string" },
+        "quantity": { "type": "number" },
+        "initialQuantity": { "type": "number" },
+        "receivedDate": { "type": "string" },
+        "costPerUnit": { "type": "number" }
+      },
+      "required": ["materialId", "batchNumber", "quantity", "receivedDate"]
+    },
+    "FinishedProduct": {
+      "title": "Finished Product",
+      "description": "Products ready for sale",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "unit": { "type": "string" },
+        "totalQuantity": { "type": "number" }
+      },
+      "required": ["name", "unit"]
+    },
+    "FinishedProductBatch": {
+      "title": "Finished Product Batch",
+      "description": "Specific batch of finished product for FIFO tracking",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "batchNumber": { "type": "string" },
+        "quantity": { "type": "number" },
+        "initialQuantity": { "type": "number" },
+        "productionDate": { "type": "string" }
+      },
+      "required": ["productId", "batchNumber", "quantity", "productionDate"]
+    },
+    "Recipe": {
+      "title": "Recipe",
+      "description": "Production recipes",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "ingredients": { "type": "array" }
+      },
+      "required": ["name", "ingredients"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "History of stock movements",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "category": { "type": "string" },
+        "itemId": { "type": "string" },
+        "batchId": { "type": "string" },
+        "quantity": { "type": "number" },
+        "date": { "type": "string" }
+      },
+      "required": ["type", "category", "itemId", "batchId", "quantity", "date"]
+    }
+  },
+  "firestore": {
+    "/raw_materials": { "schema": "RawMaterial", "description": "Raw materials list" },
+    "/raw_material_batches": { "schema": "RawMaterialBatch", "description": "Batches of raw materials" },
+    "/finished_products": { "schema": "FinishedProduct", "description": "Finished products list" },
+    "/finished_product_batches": { "schema": "FinishedProductBatch", "description": "Batches of finished products" },
+    "/recipes": { "schema": "Recipe", "description": "Production recipes" },
+    "/transactions": { "schema": "Transaction", "description": "Stock movement history" }
+  }
+}
