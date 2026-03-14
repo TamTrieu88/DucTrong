@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, query, where, getDocs, orderBy, writeBatch } from 'firebase/firestore';
 import { FinishedProduct, FinishedProductBatch } from '../types';
@@ -22,10 +22,10 @@ export const FinishedProducts: React.FC = () => {
   const { confirm, dialogProps } = useConfirmDialog();
 
   useEffect(() => {
-    const unsubProd = onSnapshot(collection(db, 'finished_products'), (snap) => {
+    const unsubProd = onSnapshot(collection(db, 'DT_finished_products'), (snap) => {
       setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProduct)));
     });
-    const unsubBatch = onSnapshot(collection(db, 'finished_product_batches'), (snap) => {
+    const unsubBatch = onSnapshot(collection(db, 'DT_finished_product_batches'), (snap) => {
       setBatches(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProductBatch)));
     });
     return () => {
@@ -37,11 +37,11 @@ export const FinishedProducts: React.FC = () => {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingProduct) {
-      const prodRef = doc(db, 'finished_products', editingProduct.id);
+      const prodRef = doc(db, 'DT_finished_products', editingProduct.id);
       await updateDoc(prodRef, { name: newProduct.name, unit: newProduct.unit });
       setEditingProduct(null);
     } else {
-      await addDoc(collection(db, 'finished_products'), { ...newProduct, totalQuantity: 0 });
+      await addDoc(collection(db, 'DT_finished_products'), { ...newProduct, totalQuantity: 0 });
     }
     setNewProduct({ name: '', unit: '' });
   };
@@ -53,10 +53,10 @@ export const FinishedProducts: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'finished_products', id));
+      await deleteDoc(doc(db, 'DT_finished_products', id));
       
       // Delete associated batches
-      const batchesQuery = query(collection(db, 'finished_product_batches'), where('productId', '==', id));
+      const batchesQuery = query(collection(db, 'DT_finished_product_batches'), where('productId', '==', id));
       const batchesSnap = await getDocs(batchesQuery);
       const batch = writeBatch(db);
       batchesSnap.docs.forEach(d => batch.delete(d.ref));
@@ -71,11 +71,11 @@ export const FinishedProducts: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'finished_product_batches', batch.id));
+      await deleteDoc(doc(db, 'DT_finished_product_batches', batch.id));
       
       const prod = products.find(p => p.id === batch.productId);
       if (prod) {
-        const prodRef = doc(db, 'finished_products', prod.id);
+        const prodRef = doc(db, 'DT_finished_products', prod.id);
         await updateDoc(prodRef, { totalQuantity: prod.totalQuantity - batch.quantity });
       }
     }
@@ -99,7 +99,7 @@ export const FinishedProducts: React.FC = () => {
 
       // FIFO Consumption
       const batchesQuery = query(
-        collection(db, 'finished_product_batches'),
+        collection(db, 'DT_finished_product_batches'),
         where('productId', '==', exportData.productId),
         where('quantity', '>', 0),
         orderBy('productionDate', 'asc')
@@ -117,7 +117,7 @@ export const FinishedProducts: React.FC = () => {
         remainingToDeduct -= deductAmount;
 
         // Log transaction
-        const transRef = doc(collection(db, 'transactions'));
+        const transRef = doc(collection(db, 'DT_transactions'));
         batch.set(transRef, {
           type: 'OUT',
           category: 'FINISHED_PRODUCT',
@@ -130,7 +130,7 @@ export const FinishedProducts: React.FC = () => {
       }
 
       // Update total product quantity
-      batch.update(doc(db, 'finished_products', exportData.productId), {
+      batch.update(doc(db, 'DT_finished_products', exportData.productId), {
         totalQuantity: product.totalQuantity - exportData.quantity
       });
 

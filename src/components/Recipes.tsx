@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, getDocs, query, where, orderBy, writeBatch } from 'firebase/firestore';
 import { Recipe, RawMaterial, FinishedProduct, RawMaterialBatch } from '../types';
@@ -47,13 +47,13 @@ export const Recipes: React.FC = () => {
   const { confirm, dialogProps } = useConfirmDialog();
 
   useEffect(() => {
-    const unsubRec = onSnapshot(collection(db, 'recipes'), (snap) => {
+    const unsubRec = onSnapshot(collection(db, 'DT_recipes'), (snap) => {
       setRecipes(snap.docs.map(d => ({ id: d.id, ...d.data() } as Recipe)));
     });
-    const unsubMat = onSnapshot(collection(db, 'raw_materials'), (snap) => {
+    const unsubMat = onSnapshot(collection(db, 'DT_raw_materials'), (snap) => {
       setMaterials(snap.docs.map(d => ({ id: d.id, ...d.data() } as RawMaterial)));
     });
-    const unsubProd = onSnapshot(collection(db, 'finished_products'), (snap) => {
+    const unsubProd = onSnapshot(collection(db, 'DT_finished_products'), (snap) => {
       setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProduct)));
     });
     return () => {
@@ -73,7 +73,7 @@ export const Recipes: React.FC = () => {
   const handleSaveRecipe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingRecipe) {
-      const recipeRef = doc(db, 'recipes', editingRecipe.id);
+      const recipeRef = doc(db, 'DT_recipes', editingRecipe.id);
       await updateDoc(recipeRef, {
         ...newRecipe,
         ingredients: newRecipe.ingredients.map(ing => ({
@@ -84,7 +84,7 @@ export const Recipes: React.FC = () => {
       });
       setEditingRecipe(null);
     } else {
-      await addDoc(collection(db, 'recipes'), {
+      await addDoc(collection(db, 'DT_recipes'), {
         ...newRecipe,
         ingredients: newRecipe.ingredients.map(ing => ({
           materialId: ing.materialId,
@@ -104,7 +104,7 @@ export const Recipes: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'recipes', id));
+      await deleteDoc(doc(db, 'DT_recipes', id));
     }
   };
 
@@ -138,7 +138,7 @@ export const Recipes: React.FC = () => {
         }
 
         const batchesQuery = query(
-          collection(db, 'raw_material_batches'),
+          collection(db, 'DT_raw_material_batches'),
           where('materialId', '==', ingredient.materialId),
           where('quantity', '>', 0),
           orderBy('receivedDate', 'asc')
@@ -156,7 +156,7 @@ export const Recipes: React.FC = () => {
           remainingToDeduct -= deductAmount;
           totalMaterialCost += (deductAmount * (batchData.costPerUnit || 0));
 
-          const transRef = doc(collection(db, 'transactions'));
+          const transRef = doc(collection(db, 'DT_transactions'));
           batch.set(transRef, {
             type: 'OUT',
             category: 'RAW_MATERIAL',
@@ -168,7 +168,7 @@ export const Recipes: React.FC = () => {
           });
         }
 
-        batch.update(doc(db, 'raw_materials', ingredient.materialId), {
+        batch.update(doc(db, 'DT_raw_materials', ingredient.materialId), {
           totalQuantity: material.totalQuantity - requiredQtyBase
         });
       }
@@ -178,7 +178,7 @@ export const Recipes: React.FC = () => {
       const unitCost = (totalMaterialCost + managementFee) / actualQuantity;
 
       const productBatchNumber = `FP-${format(new Date(), 'yyyyMMdd')}-${Math.floor(Math.random() * 1000)}`;
-      const productBatchRef = doc(collection(db, 'finished_product_batches'));
+      const productBatchRef = doc(collection(db, 'DT_finished_product_batches'));
       batch.set(productBatchRef, {
         productId: productId,
         batchNumber: productBatchNumber,
@@ -191,12 +191,12 @@ export const Recipes: React.FC = () => {
       });
 
       // Update total product quantity
-      batch.update(doc(db, 'finished_products', productId), {
+      batch.update(doc(db, 'DT_finished_products', productId), {
         totalQuantity: product.totalQuantity + actualQuantity
       });
 
       // Log production transaction
-      const prodTransRef = doc(collection(db, 'transactions'));
+      const prodTransRef = doc(collection(db, 'DT_transactions'));
       const expectedTotal = recipe.outputQuantity * batchesToProduce;
       const loss = expectedTotal - actualQuantity;
       

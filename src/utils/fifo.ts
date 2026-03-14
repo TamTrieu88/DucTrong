@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   collection, 
   query, 
   where, 
@@ -15,13 +15,13 @@ import { RawMaterialLot, FinishedProductLot } from '../types';
 
 /**
  * FIFO Logic for consuming inventory
- * @param collectionName - 'raw_material_lots' or 'finished_product_lots'
+ * @param collectionName - 'DT_raw_material_lots' or 'DT_finished_product_lots'
  * @param itemIdField - 'materialId' or 'productId'
  * @param itemId - The ID of the item to consume
  * @param amountToConsume - Total quantity needed
  */
 export async function consumeInventoryFIFO(
-  collectionName: 'raw_material_lots' | 'finished_product_lots',
+  collectionName: 'DT_raw_material_lots' | 'DT_finished_product_lots',
   itemIdField: 'materialId' | 'productId',
   itemId: string,
   amountToConsume: number
@@ -29,7 +29,7 @@ export async function consumeInventoryFIFO(
   try {
     await runTransaction(db, async (transaction) => {
       // 1. Get all lots for this item, ordered by entryDate/productionDate (oldest first)
-      const dateField = collectionName === 'raw_material_lots' ? 'entryDate' : 'productionDate';
+      const dateField = collectionName === 'DT_raw_material_lots' ? 'entryDate' : 'productionDate';
       const lotsRef = collection(db, collectionName);
       const q = query(
         lotsRef, 
@@ -71,7 +71,7 @@ export async function consumeInventoryFIFO(
       }
 
       // Update the main item's currentStock
-      const itemCollection = collectionName === 'raw_material_lots' ? 'raw_materials' : 'finished_products';
+      const itemCollection = collectionName === 'DT_raw_material_lots' ? 'DT_raw_materials' : 'DT_finished_products';
       const itemRef = doc(db, itemCollection, itemId);
       const itemSnap = await transaction.get(itemRef);
       if (itemSnap.exists()) {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -22,8 +22,8 @@ const FULL_PERMISSIONS: PermissionsMap = {
   'overview': { create: true, read: true, update: true, delete: true },
   'raw-materials': { create: true, read: true, update: true, delete: true },
   'finished-products': { create: true, read: true, update: true, delete: true },
-  'customers': { create: true, read: true, update: true, delete: true },
-  'recipes': { create: true, read: true, update: true, delete: true },
+  'DT_customers': { create: true, read: true, update: true, delete: true },
+  'DT_recipes': { create: true, read: true, update: true, delete: true },
   'sales': { create: true, read: true, update: true, delete: true },
   'accounts': { create: true, read: true, update: true, delete: true },
 };
@@ -40,10 +40,10 @@ export default function App() {
   // Seed admin user on first load
   useEffect(() => {
     const seedAdmin = async () => {
-      const q = query(collection(db, 'users'), where('username', '==', 'admin'));
+      const q = query(collection(db, 'DT_users'), where('username', '==', 'admin'));
       const snap = await getDocs(q);
       if (snap.empty) {
-        await addDoc(collection(db, 'users'), {
+        await addDoc(collection(db, 'DT_users'), {
           displayName: 'Administrator',
           username: 'admin',
           password: '123',
@@ -61,7 +61,7 @@ export default function App() {
     setError('');
 
     try {
-      const q = query(collection(db, 'users'), where('username', '==', username.trim()));
+      const q = query(collection(db, 'DT_users'), where('username', '==', username.trim()));
       const snap = await getDocs(q);
 
       if (snap.empty) {
@@ -158,9 +158,9 @@ export default function App() {
       case 'overview': return <Overview />;
       case 'raw-materials': return <RawMaterials />;
       case 'finished-products': return <FinishedProducts />;
-      case 'customers': return <Customers />;
+      case 'DT_customers': return <Customers />;
       case 'sales': return <Sales />;
-      case 'recipes': return <Recipes />;
+      case 'DT_recipes': return <Recipes />;
       case 'accounts': return <AccountManagement />;
       default: return <Overview />;
     }

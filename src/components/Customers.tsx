@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { Customer } from '../types';
@@ -20,7 +20,7 @@ export const Customers: React.FC = () => {
   const { confirm, dialogProps } = useConfirmDialog();
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'customers'), (snap) => {
+    const unsub = onSnapshot(collection(db, 'DT_customers'), (snap) => {
       setCustomers(snap.docs.map(d => ({ id: d.id, ...d.data() } as Customer)));
     });
     return () => unsub();
@@ -29,11 +29,11 @@ export const Customers: React.FC = () => {
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingCustomer) {
-      const custRef = doc(db, 'customers', editingCustomer.id);
+      const custRef = doc(db, 'DT_customers', editingCustomer.id);
       await updateDoc(custRef, newCustomer);
       setEditingCustomer(null);
     } else {
-      await addDoc(collection(db, 'customers'), newCustomer);
+      await addDoc(collection(db, 'DT_customers'), newCustomer);
     }
     setNewCustomer({ name: '', phone: '', address: '', totalDebt: 0 });
     setShowAddModal(false);
@@ -46,7 +46,7 @@ export const Customers: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'customers', id));
+      await deleteDoc(doc(db, 'DT_customers', id));
     }
   };
 
@@ -64,7 +64,7 @@ export const Customers: React.FC = () => {
       const batch = writeBatch(db);
       
       // Update customer debt
-      const custRef = doc(db, 'customers', payingCustomer.id);
+      const custRef = doc(db, 'DT_customers', payingCustomer.id);
       batch.update(custRef, {
         totalDebt: payingCustomer.totalDebt - paymentAmount
       });
@@ -79,7 +79,7 @@ export const Customers: React.FC = () => {
       });
 
       // (Optional) Log transaction if needed
-      const transRef = doc(collection(db, 'transactions'));
+      const transRef = doc(collection(db, 'DT_transactions'));
       batch.set(transRef, {
         type: 'IN', // Receiving money
         category: 'FINISHED_PRODUCT', // Assuming all debts are from FP

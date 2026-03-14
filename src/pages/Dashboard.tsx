@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   collection, 
   onSnapshot, 
@@ -29,7 +29,7 @@ export default function Dashboard() {
   const [products, setProducts] = useState<FinishedProduct[]>([]);
 
   useEffect(() => {
-    const unsubMaterials = onSnapshot(collection(db, 'raw_materials'), (snap) => {
+    const unsubMaterials = onSnapshot(collection(db, 'DT_raw_materials'), (snap) => {
       const mats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as RawMaterial));
       setMaterials(mats);
       setStats(prev => ({
@@ -38,7 +38,7 @@ export default function Dashboard() {
       }));
     });
 
-    const unsubProducts = onSnapshot(collection(db, 'finished_products'), (snap) => {
+    const unsubProducts = onSnapshot(collection(db, 'DT_finished_products'), (snap) => {
       const prods = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as FinishedProduct));
       setProducts(prods);
       setStats(prev => ({

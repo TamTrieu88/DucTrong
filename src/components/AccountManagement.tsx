@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, getDocs, query, where } from 'firebase/firestore';
 import { UserAccount, PagePermission, PermissionsMap } from '../types';
@@ -10,8 +10,8 @@ const SYSTEM_PAGES = [
   { id: 'overview', label: 'Tổng quan' },
   { id: 'raw-materials', label: 'Kho nguyên liệu' },
   { id: 'finished-products', label: 'Kho thành phẩm' },
-  { id: 'customers', label: 'Khách hàng' },
-  { id: 'recipes', label: 'Công thức & Sản xuất' },
+  { id: 'DT_customers', label: 'Khách hàng' },
+  { id: 'DT_recipes', label: 'Công thức & Sản xuất' },
   { id: 'sales', label: 'Bán hàng' },
 ];
 
@@ -54,7 +54,7 @@ export const AccountManagement: React.FC = () => {
   const { confirm, dialogProps } = useConfirmDialog();
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'users'), (snap) => {
+    const unsub = onSnapshot(collection(db, 'DT_users'), (snap) => {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() } as UserAccount)));
     });
     return () => unsub();
@@ -96,7 +96,7 @@ export const AccountManagement: React.FC = () => {
     }
 
     // Check duplicate username
-    const existingQ = query(collection(db, 'users'), where('username', '==', form.username.trim()));
+    const existingQ = query(collection(db, 'DT_users'), where('username', '==', form.username.trim()));
     const existingSnap = await getDocs(existingQ);
     const isDuplicate = existingSnap.docs.some(d => d.id !== editingUser?.id);
     if (isDuplicate) {
@@ -115,14 +115,14 @@ export const AccountManagement: React.FC = () => {
         if (form.password.trim()) {
           updateData.password = form.password.trim();
         }
-        await updateDoc(doc(db, 'users', editingUser.id), updateData);
+        await updateDoc(doc(db, 'DT_users', editingUser.id), updateData);
         setMessage({ type: 'success', text: 'Cập nhật tài khoản thành công!' });
       } else {
         if (!form.password.trim()) {
           setMessage({ type: 'error', text: 'Vui lòng nhập mật khẩu cho tài khoản mới.' });
           return;
         }
-        await addDoc(collection(db, 'users'), {
+        await addDoc(collection(db, 'DT_users'), {
           displayName: form.displayName.trim(),
           username: form.username.trim(),
           password: form.password.trim(),
@@ -147,7 +147,7 @@ export const AccountManagement: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'users', user.id));
+      await deleteDoc(doc(db, 'DT_users', user.id));
     }
   };
 

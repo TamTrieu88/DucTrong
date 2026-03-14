@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, getDocs, query, where, orderBy, writeBatch } from 'firebase/firestore';
 import { FinishedProduct, FinishedProductBatch, Customer } from '../types';
@@ -23,12 +23,12 @@ export const Sales: React.FC = () => {
   const { confirm, dialogProps } = useConfirmDialog();
 
   useEffect(() => {
-    onSnapshot(collection(db, 'finished_products'), (snap) => setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProduct))));
-    onSnapshot(query(collection(db, 'transactions'), where('type', '==', 'OUT'), orderBy('date', 'desc')), (snap) => {
+    onSnapshot(collection(db, 'DT_finished_products'), (snap) => setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProduct))));
+    onSnapshot(query(collection(db, 'DT_transactions'), where('type', '==', 'OUT'), orderBy('date', 'desc')), (snap) => {
       setTransactions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
-    onSnapshot(collection(db, 'customers'), (snap) => setCustomers(snap.docs.map(d => ({ id: d.id, ...d.data() } as Customer))));
-    onSnapshot(collection(db, 'finished_product_batches'), (snap) => setBatches(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProductBatch))));
+    onSnapshot(collection(db, 'DT_customers'), (snap) => setCustomers(snap.docs.map(d => ({ id: d.id, ...d.data() } as Customer))));
+    onSnapshot(collection(db, 'DT_finished_product_batches'), (snap) => setBatches(snap.docs.map(d => ({ id: d.id, ...d.data() } as FinishedProductBatch))));
   }, []);
 
   const maxAvailable = (() => {
@@ -141,7 +141,7 @@ export const Sales: React.FC = () => {
       if (selectedCustomerId && debtToAdd > 0) {
         const customer = customers.find(c => c.id === selectedCustomerId);
         if (customer) {
-          batch.update(doc(db, 'customers', selectedCustomerId), {
+          batch.update(doc(db, 'DT_customers', selectedCustomerId), {
             totalDebt: customer.totalDebt + debtToAdd
           });
         }
@@ -153,7 +153,7 @@ export const Sales: React.FC = () => {
 
         // FIFO Consumption of Finished Products
         const batchesQuery = query(
-          collection(db, 'finished_product_batches'),
+          collection(db, 'DT_finished_product_batches'),
           where('productId', '==', item.productId),
           where('quantity', '>', 0),
           orderBy('productionDate', 'asc')
@@ -175,7 +175,7 @@ export const Sales: React.FC = () => {
           const profit = revenue - cogs;
 
           // Log transaction
-          const transRef = doc(collection(db, 'transactions'));
+          const transRef = doc(collection(db, 'DT_transactions'));
           batch.set(transRef, {
             type: 'OUT',
             category: 'FINISHED_PRODUCT',
@@ -191,7 +191,7 @@ export const Sales: React.FC = () => {
         }
 
         // Update total product quantity
-        batch.update(doc(db, 'finished_products', item.productId), {
+        batch.update(doc(db, 'DT_finished_products', item.productId), {
           totalQuantity: product.totalQuantity - item.quantity
         });
       }
@@ -224,7 +224,7 @@ export const Sales: React.FC = () => {
         const chunk = transactions.slice(i, i + BATCH_SIZE);
         const currentBatch = writeBatch(db);
         chunk.forEach(trans => {
-          currentBatch.delete(doc(db, 'transactions', trans.id));
+          currentBatch.delete(doc(db, 'DT_transactions', trans.id));
         });
         await currentBatch.commit();
       }

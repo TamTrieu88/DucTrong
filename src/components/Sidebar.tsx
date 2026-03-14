@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { 
   LayoutDashboard, 
   Package, 
@@ -27,8 +27,8 @@ const allMenuItems = [
   { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
   { id: 'raw-materials', label: 'Kho nguyên liệu', icon: Package },
   { id: 'finished-products', label: 'Kho thành phẩm', icon: Box },
-  { id: 'customers', label: 'Khách hàng', icon: Users },
-  { id: 'recipes', label: 'Công thức & Sản xuất', icon: FlaskConical },
+  { id: 'DT_customers', label: 'Khách hàng', icon: Users },
+  { id: 'DT_recipes', label: 'Công thức & Sản xuất', icon: FlaskConical },
   { id: 'sales', label: 'Bán hàng', icon: ShoppingCart },
 ];
 

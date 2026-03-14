@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, query, where, getDocs, orderBy, writeBatch } from '../lib/localStore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, query, where, getDocs, orderBy, writeBatch } from 'firebase/firestore';
 import { RawMaterial, RawMaterialBatch } from '../types';
 import { Plus, History, Package, Calendar, Tag, Info, Edit2, Trash2, ArrowUpRight, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { cn } from '../utils';
@@ -23,10 +23,10 @@ export const RawMaterials: React.FC = () => {
   const { confirm, dialogProps } = useConfirmDialog();
 
   useEffect(() => {
-    const unsubMat = onSnapshot(collection(db, 'raw_materials'), (snap) => {
+    const unsubMat = onSnapshot(collection(db, 'DT_raw_materials'), (snap) => {
       setMaterials(snap.docs.map(d => ({ id: d.id, ...d.data() } as RawMaterial)));
     });
-    const unsubBatch = onSnapshot(collection(db, 'raw_material_batches'), (snap) => {
+    const unsubBatch = onSnapshot(collection(db, 'DT_raw_material_batches'), (snap) => {
       setBatches(snap.docs.map(d => ({ id: d.id, ...d.data() } as RawMaterialBatch)));
     });
     return () => {
@@ -38,11 +38,11 @@ export const RawMaterials: React.FC = () => {
   const handleAddMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingMaterial) {
-      const matRef = doc(db, 'raw_materials', editingMaterial.id);
+      const matRef = doc(db, 'DT_raw_materials', editingMaterial.id);
       await updateDoc(matRef, { name: newMaterial.name, unit: newMaterial.unit });
       setEditingMaterial(null);
     } else {
-      await addDoc(collection(db, 'raw_materials'), { ...newMaterial, totalQuantity: 0 });
+      await addDoc(collection(db, 'DT_raw_materials'), { ...newMaterial, totalQuantity: 0 });
     }
     setNewMaterial({ name: '', unit: '' });
   };
@@ -54,10 +54,10 @@ export const RawMaterials: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'raw_materials', id));
+      await deleteDoc(doc(db, 'DT_raw_materials', id));
       
       // Delete associated batches
-      const batchesQuery = query(collection(db, 'raw_material_batches'), where('materialId', '==', id));
+      const batchesQuery = query(collection(db, 'DT_raw_material_batches'), where('materialId', '==', id));
       const batchesSnap = await getDocs(batchesQuery);
       const batch = writeBatch(db);
       batchesSnap.docs.forEach(d => batch.delete(d.ref));
@@ -83,7 +83,7 @@ export const RawMaterials: React.FC = () => {
 
       // FIFO Consumption
       const batchesQuery = query(
-        collection(db, 'raw_material_batches'),
+        collection(db, 'DT_raw_material_batches'),
         where('materialId', '==', exportData.materialId),
         where('quantity', '>', 0),
         orderBy('receivedDate', 'asc')
@@ -101,7 +101,7 @@ export const RawMaterials: React.FC = () => {
         remainingToDeduct -= deductAmount;
 
         // Log transaction
-        const transRef = doc(collection(db, 'transactions'));
+        const transRef = doc(collection(db, 'DT_transactions'));
         batch.set(transRef, {
           type: 'OUT',
           category: 'RAW_MATERIAL',
@@ -114,7 +114,7 @@ export const RawMaterials: React.FC = () => {
       }
 
       // Update total material quantity
-      batch.update(doc(db, 'raw_materials', exportData.materialId), {
+      batch.update(doc(db, 'DT_raw_materials', exportData.materialId), {
         totalQuantity: material.totalQuantity - exportData.quantity
       });
 
@@ -132,7 +132,7 @@ export const RawMaterials: React.FC = () => {
   const handleAddBatch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingBatch) {
-      const batchRef = doc(db, 'raw_material_batches', editingBatch.id);
+      const batchRef = doc(db, 'DT_raw_material_batches', editingBatch.id);
       const diff = newBatch.quantity - editingBatch.quantity;
       
       await updateDoc(batchRef, { 
@@ -143,7 +143,7 @@ export const RawMaterials: React.FC = () => {
       // Update total quantity in material
       const mat = materials.find(m => m.id === editingBatch.materialId);
       if (mat) {
-        const matRef = doc(db, 'raw_materials', mat.id);
+        const matRef = doc(db, 'DT_raw_materials', mat.id);
         await updateDoc(matRef, { totalQuantity: mat.totalQuantity + diff });
       }
       setEditingBatch(null);
@@ -156,19 +156,19 @@ export const RawMaterials: React.FC = () => {
         receivedDate: new Date().toISOString(),
       };
       
-      const batchRef = await addDoc(collection(db, 'raw_material_batches'), batchData);
+      const batchRef = await addDoc(collection(db, 'DT_raw_material_batches'), batchData);
       
       // Update total quantity in material
       const mat = materials.find(m => m.id === newBatch.materialId);
       if (mat) {
-        const matRef = doc(db, 'raw_materials', mat.id);
+        const matRef = doc(db, 'DT_raw_materials', mat.id);
         await updateDoc(matRef, { 
           totalQuantity: mat.totalQuantity + newBatch.quantity
         });
       }
 
       // Log transaction
-      await addDoc(collection(db, 'transactions'), {
+      await addDoc(collection(db, 'DT_transactions'), {
         type: 'IN',
         category: 'RAW_MATERIAL',
         itemId: newBatch.materialId,
@@ -190,12 +190,12 @@ export const RawMaterials: React.FC = () => {
       confirmText: 'Xóa',
     });
     if (ok) {
-      await deleteDoc(doc(db, 'raw_material_batches', batch.id));
+      await deleteDoc(doc(db, 'DT_raw_material_batches', batch.id));
       
       // Update total quantity in material
       const mat = materials.find(m => m.id === batch.materialId);
       if (mat) {
-        const matRef = doc(db, 'raw_materials', mat.id);
+        const matRef = doc(db, 'DT_raw_materials', mat.id);
         await updateDoc(matRef, { totalQuantity: mat.totalQuantity - batch.quantity });
       }
     }

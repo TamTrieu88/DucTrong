@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   collection, 
   onSnapshot, 
@@ -29,11 +29,11 @@ export default function RawMaterials() {
   const [newLot, setNewLot] = useState({ batchNumber: '', quantity: 0, entryDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"), expiryDate: '' });
 
   useEffect(() => {
-    const unsubMaterials = onSnapshot(collection(db, 'raw_materials'), (snap) => {
+    const unsubMaterials = onSnapshot(collection(db, 'DT_raw_materials'), (snap) => {
       setMaterials(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as RawMaterial)));
     });
 
-    const unsubLots = onSnapshot(collection(db, 'raw_material_lots'), (snap) => {
+    const unsubLots = onSnapshot(collection(db, 'DT_raw_material_lots'), (snap) => {
       setLots(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as RawMaterialLot)));
     });
 
@@ -46,14 +46,14 @@ export default function RawMaterials() {
   const handleAddMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'raw_materials'), {
+      await addDoc(collection(db, 'DT_raw_materials'), {
         ...newMaterial,
         currentStock: 0
       });
       setNewMaterial({ name: '', unit: '' });
       setIsAddModalOpen(false);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'raw_materials');
+      handleFirestoreError(error, OperationType.CREATE, 'DT_raw_materials');
     }
   };
 
@@ -71,17 +71,17 @@ export default function RawMaterials() {
         expiryDate: newLot.expiryDate || null
       };
 
-      await addDoc(collection(db, 'raw_material_lots'), lotData);
+      await addDoc(collection(db, 'DT_raw_material_lots'), lotData);
       
       // Update material stock
-      await updateDoc(doc(db, 'raw_materials', selectedMaterial.id), {
+      await updateDoc(doc(db, 'DT_raw_materials', selectedMaterial.id), {
         currentStock: increment(Number(newLot.quantity))
       });
 
       setNewLot({ batchNumber: '', quantity: 0, entryDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"), expiryDate: '' });
       setIsLotModalOpen(false);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'raw_material_lots');
+      handleFirestoreError(error, OperationType.CREATE, 'DT_raw_material_lots');
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   collection, 
   onSnapshot, 
@@ -25,11 +25,11 @@ export default function FinishedProducts() {
   const [newLot, setNewLot] = useState({ batchNumber: '', quantity: 0, productionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"), expiryDate: '' });
 
   useEffect(() => {
-    const unsubProducts = onSnapshot(collection(db, 'finished_products'), (snap) => {
+    const unsubProducts = onSnapshot(collection(db, 'DT_finished_products'), (snap) => {
       setProducts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as FinishedProduct)));
     });
 
-    const unsubLots = onSnapshot(collection(db, 'finished_product_lots'), (snap) => {
+    const unsubLots = onSnapshot(collection(db, 'DT_finished_product_lots'), (snap) => {
       setLots(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as FinishedProductLot)));
     });
 
@@ -42,14 +42,14 @@ export default function FinishedProducts() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'finished_products'), {
+      await addDoc(collection(db, 'DT_finished_products'), {
         ...newProduct,
         currentStock: 0
       });
       setNewProduct({ name: '', unit: '', price: 0 });
       setIsAddModalOpen(false);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'finished_products');
+      handleFirestoreError(error, OperationType.CREATE, 'DT_finished_products');
     }
   };
 
@@ -67,17 +67,17 @@ export default function FinishedProducts() {
         expiryDate: newLot.expiryDate || null
       };
 
-      await addDoc(collection(db, 'finished_product_lots'), lotData);
+      await addDoc(collection(db, 'DT_finished_product_lots'), lotData);
       
       // Update product stock
-      await updateDoc(doc(db, 'finished_products', selectedProduct.id), {
+      await updateDoc(doc(db, 'DT_finished_products', selectedProduct.id), {
         currentStock: increment(Number(newLot.quantity))
       });
 
       setNewLot({ batchNumber: '', quantity: 0, productionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"), expiryDate: '' });
       setIsLotModalOpen(false);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'finished_product_lots');
+      handleFirestoreError(error, OperationType.CREATE, 'DT_finished_product_lots');
     }
   };
 

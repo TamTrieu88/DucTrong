@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, limit, orderBy } from 'firebase/firestore';
 import { Package, Box, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight, AlertTriangle, CalendarDays } from 'lucide-react';
@@ -39,7 +39,7 @@ export const Overview: React.FC = () => {
     // 1. Raw Material Batches → Total Value
     unsubs.push(
       onSnapshot(
-        collection(db, 'raw_material_batches'),
+        collection(db, 'DT_raw_material_batches'),
         (snap) => {
           let total = 0;
           snap.docs.forEach((docSnap) => {
@@ -55,7 +55,7 @@ export const Overview: React.FC = () => {
     // 2. Finished Product Batches → Total Value + Expiry alerts
     unsubs.push(
       onSnapshot(
-        collection(db, 'finished_product_batches'),
+        collection(db, 'DT_finished_product_batches'),
         (snap) => {
           let total = 0;
           const soonDate = addDays(new Date(), 7);
@@ -89,7 +89,7 @@ export const Overview: React.FC = () => {
     // 3. Transactions → Recent activity + chart + 7d revenue/profit
     unsubs.push(
       onSnapshot(
-        query(collection(db, 'transactions'), orderBy('date', 'desc'), limit(50)),
+        query(collection(db, 'DT_transactions'), orderBy('date', 'desc'), limit(50)),
         (snap) => {
           const trans = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() } as Transaction));
           setRecentTransactions(trans.slice(0, 5));
@@ -132,7 +132,7 @@ export const Overview: React.FC = () => {
     // 4. Raw Materials → Low stock alerts
     unsubs.push(
       onSnapshot(
-        collection(db, 'raw_materials'),
+        collection(db, 'DT_raw_materials'),
         (snap) => {
           const rmAlerts = snap.docs
             .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() } as RawMaterial))
@@ -154,7 +154,7 @@ export const Overview: React.FC = () => {
     // 5. Finished Products → Low stock alerts
     unsubs.push(
       onSnapshot(
-        collection(db, 'finished_products'),
+        collection(db, 'DT_finished_products'),
         (snap) => {
           const fpAlerts = snap.docs
             .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() } as FinishedProduct))
