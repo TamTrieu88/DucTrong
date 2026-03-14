@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -36,6 +36,25 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(true);
+
+  // Restore session from sessionStorage
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('dt_session');
+      if (saved) {
+        const { user: savedUser, activeTab: savedTab } = JSON.parse(saved);
+        if (savedUser) {
+          setUser(savedUser);
+          setActiveTab(savedTab || 'overview');
+        }
+      }
+    } catch {
+      sessionStorage.removeItem('dt_session');
+    } finally {
+      setIsRestoring(false);
+    }
+  }, []);
 
   // Seed admin user on first load
   useEffect(() => {
@@ -81,13 +100,15 @@ export default function App() {
 
       const permissions = userData.role === 'admin' ? FULL_PERMISSIONS : (userData.permissions || {});
 
-      setUser({
+      const loggedInUser: AuthUser = {
         username: userData.username,
         displayName: userData.displayName || userData.username,
         email: userData.email || `${userData.username}@ductrong.vn`,
         role: userData.role || 'member',
         permissions,
-      });
+      };
+      setUser(loggedInUser);
+      sessionStorage.setItem('dt_session', JSON.stringify({ user: loggedInUser, activeTab: 'overview' }));
       setError('');
     } catch (err: any) {
       setError('Lỗi kết nối. Vui lòng thử lại.');
@@ -98,12 +119,21 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem('dt_session');
     setUser(null);
     setUsername('');
     setPassword('');
     setError('');
     setActiveTab('overview');
   };
+
+  if (isRestoring) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -173,6 +203,8 @@ export default function App() {
         setActiveTab={(tab) => {
           setActiveTab(tab);
           setSidebarOpen(false);
+          // Persist active tab so F5 returns to same page
+          sessionStorage.setItem('dt_session', JSON.stringify({ user, activeTab: tab }));
         }} 
         onLogout={handleLogout} 
         user={user}
